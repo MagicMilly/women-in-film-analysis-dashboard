@@ -1,19 +1,19 @@
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
+import datetime
 import pandas as pd 
+import pandas_datareader.data as web
 import plotly.graph_objs as go
 
-app = dash.Dash()
+from dash.dependencies import Input, Output
 
-# df = pd.read_csv('my_data/practice_data/bechdel_no_zeros.csv')
+start = datetime.datetime(2015,1,1)
+end = datetime.datetime(2018,2,8)
 
-# colors = {
-#     'background': '#111111',
-#     'text': '#7FDBFF'
-# }
+df = web.DataReader('TSLA', 'google', start, end)
 
-app.layout = html.Div('Dash tutorial with sentdex')
+print(df.head())
 
-if __name__ == '__main__':
-    app.run_server(debug=True)
+# if __name__ == '__main__':
+#     app.run_server(debug=True)
