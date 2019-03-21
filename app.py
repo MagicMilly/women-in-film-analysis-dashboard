@@ -13,8 +13,8 @@ external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
 colors = {
-    'background': '#111111',
-    'text': '#7FDBFF'
+    'background': '#FFFFFF',
+    'text': '#000000'
 }
 
 app.layout = html.Div(style={'backgroundColor': colors['background']}, children=[
@@ -32,49 +32,94 @@ app.layout = html.Div(style={'backgroundColor': colors['background']}, children=
     }),
     
     html.Div(
-        style={
-            # would like font for radio button options to be white in this situation, but can't figure out
-            # how to do that yet
-            'fontColor': 'white'
-        },
         children=dcc.RadioItems(
             id='radio-button-choice',
             options=[
-                {'label': 'Bechdel Test passing vs. non-passing', 'value': 'Test Data'},
-                {'label': 'Montréal', 'value': 'MTL'},
-                {'label': 'San Francisco', 'value': 'SF'}
-            ],
-            # labelStyle={'fontColor': 'white'},
-            # that doesn't work either
-            # this is a NICE-TO-HAVE
-            value='MTL'
+                {'label': 'Passing vs. Non-Passing Movies', 'value': 'passing'},
+                {'label': 'Movies by Year', 'value': 'yearly'},
+                {'label': 'Crew Gender', 'value': 'crew'}
+            ]
         )      
     ),
     
     dcc.Graph(
-        id='output-plot',
-        figure={
-            'data': [
-                go.Bar(
-                    x=["passing", "non-passing"],
-                    y=[bechdel_df.passing.value_counts()[1], bechdel_df.passing.value_counts()[0]]),
-            ],
-            'layout': {
-                'plot_bgcolor': colors['background'],
-                'paper_bgcolor': colors['background'],
-                'font': {
-                    'color': colors['text']
-                }
-            }
-        }
+        id='output-plot'
     ),
 ])
 
 @app.callback(
-    Output(component_id='output-plot'),
-    [Input(component_id='radio-button-choice')]
+    Output('output-plot', 'figure'),
+    [Input('radio-button-choice', 'value')]
 )
-def update_plot(chosen_plot):
+def update_plot(radio_button_choice):
+    
+    year_counts = bechdel_df.groupby(['year']).size()
+    gender_columns = bechdel_df.columns[5:10]
+    
+    if radio_button_choice == 'passing':
+        
+        return {
+            'data': [
+                go.Bar(
+                    x=["passing", "non-passing"],
+                    y=[bechdel_df.passing.value_counts()[1], bechdel_df.passing.value_counts()[0]]
+                )
+            ],
+            'layout': go.Layout(
+                        title='Passing vs. Non-Passing Movies in Dataset',
+                        yaxis={
+                            'title': 'Number of Movies'
+                        }
+            )
+        }
+    
+    elif radio_button_choice == 'yearly':
+        
+        return {
+            'data': [
+                go.Bar(
+                    x=[year for year in year_counts.index],
+                    y=[count for count in year_counts.values]
+                )
+            ],
+            'layout': go.Layout(
+                        title='Total Movies in Dataset by Year',
+                        xaxis={
+                            'title': 'Year'
+                        },
+                        yaxis={
+                            'title': 'Number of Movies'
+                        }
+            )
+        }
+    
+    else:
+        
+        return {
+            'data': [
+                {
+                    'x': [col for col in gender_columns],
+                    'y': [val for val in bechdel_df.groupby('passing')[gender_columns].sum().values[0]],
+                    'name': 'Non-passing Movies',
+                    'type': 'bar'
+                },
+                {
+                    'x': [col for col in gender_columns],
+                    'y': [val for val in bechdel_df.groupby('passing')[gender_columns].sum().values[1]],
+                    'name': 'Passing Movies',
+                    'type': 'bar'
+                }
+            ],
+            'layout': go.Layout(
+                        title='Crew Members of Underrepresented Genders in Passing vs. Non-Passing Movies',
+                        xaxis={
+                            'title': 'Crew Role'
+                        },
+                        yaxis={
+                            'title': 'Gender Count'
+                        }
+            )
+        }
     
 
 if __name__ == '__main__':
