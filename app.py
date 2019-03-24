@@ -6,7 +6,7 @@ import pandas as pd
 import plotly.graph_objs as go
 from dash.dependencies import Input, Output
 
-bechdel_df = pd.read_csv('my_data/updated_bechdel_6.csv')
+bechdel_df = pd.read_csv('my_data/updated_bechdel_7.csv')
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
@@ -151,8 +151,10 @@ def update_plot(radio_button_choice):
 )
 def update_table(text_input):
     
-    if text_input:
-        return bechdel_df[:10].to_dict("rows")
+    title = str(text_input).capitalize()
+    selected_df = bechdel_df[bechdel_df.title == title]
+    
+    return selected_df.to_dict("rows")
     
 
 if __name__ == '__main__':
