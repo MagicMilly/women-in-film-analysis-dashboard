@@ -1,12 +1,12 @@
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
+import dash_table
 import pandas as pd
 import plotly.graph_objs as go
 from dash.dependencies import Input, Output
 
-bechdel_df = pd.read_csv('my_data/updated_bechdel_4.csv')
-# year_counts = bechdel_df.groupby(['year']).size()
+bechdel_df = pd.read_csv('my_data/updated_bechdel_6.csv')
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
@@ -37,14 +37,37 @@ app.layout = html.Div(style={'backgroundColor': colors['background']}, children=
             options=[
                 {'label': 'Passing vs. Non-Passing Movies', 'value': 'passing'},
                 {'label': 'Movies by Year', 'value': 'yearly'},
-                {'label': 'Crew Gender', 'value': 'crew'}
+                {'label': 'Crew Gender', 'value': 'crew'},
             ]
         )      
     ),
     
-    dcc.Graph(
-        id='output-plot'
+    html.Div(
+        children=[
+            dcc.Input(
+                id="text-input",
+                value="Enter a value...",
+                type="text"
+)
+        ]
     ),
+    
+    html.Div(
+        children=[
+            dcc.Graph(
+                id="output-plot"
+            )
+        ]
+    ),
+    
+    html.Div(
+        children=[
+            dash_table.DataTable(
+                id="output-table",
+                columns=[{"name": i, "id": i} for i in bechdel_df.columns]
+            )
+        ]
+    )
 ])
 
 @app.callback(
@@ -54,7 +77,8 @@ app.layout = html.Div(style={'backgroundColor': colors['background']}, children=
 def update_plot(radio_button_choice):
     
     year_counts = bechdel_df.groupby(['year']).size()
-    gender_columns = bechdel_df.columns[5:10]
+    # would be more scalable to have gender columns be any column with 'gender' in name
+    gender_columns = bechdel_df.columns[5:9]
     
     if radio_button_choice == 'passing':
         
@@ -93,7 +117,7 @@ def update_plot(radio_button_choice):
             )
         }
     
-    else:
+    elif radio_button_choice == "crew":
         
         return {
             'data': [
@@ -111,7 +135,7 @@ def update_plot(radio_button_choice):
                 }
             ],
             'layout': go.Layout(
-                        title='Crew Members of Underrepresented Genders in Passing vs. Non-Passing Movies',
+                        title='Crew Members of Underrepresented Genders in Passing vs. Non-Passing Movies - Yes this plot is confusing',
                         xaxis={
                             'title': 'Crew Role'
                         },
@@ -120,6 +144,15 @@ def update_plot(radio_button_choice):
                         }
             )
         }
+    
+@app.callback(
+    Output('output-table', 'data'),
+    [Input('text-input', 'value')]
+)
+def update_table(text_input):
+    
+    if text_input:
+        return bechdel_df[:10].to_dict("rows")
     
 
 if __name__ == '__main__':
