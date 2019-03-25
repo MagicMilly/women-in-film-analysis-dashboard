@@ -38,6 +38,7 @@ app.layout = html.Div(style={'backgroundColor': colors['background']}, children=
                 {'label': 'Passing vs. Non-Passing Movies', 'value': 'passing'},
                 {'label': 'Movies by Year', 'value': 'yearly'},
                 {'label': 'Crew Gender', 'value': 'crew'},
+                {"label": "Oscars 2019", "value": "oscars"}
             ]
         )      
     ),
@@ -142,6 +143,38 @@ def update_plot(radio_button_choice):
                         yaxis={
                             'title': 'Gender Count'
                         }
+            )
+        }
+    
+    elif radio_button_choice == "oscars":
+        
+        categories = ["All Categories", "Best Picture", "Director", "Cinematography", "Editing",
+                     "Original Screenplay", "Adapted Screenplay", "Documentary - Feature", "Documentary - Short", "Production Design",
+                     "Costume Design", "Makeup & Hair", "Original Score", "Original Song", "Soung Mixing", "Sound Editing",
+                     "Visual Effects", "Animated Feature", "Live Action Short", "Animated Short"]
+
+        y_male = [75,80,100,100,100,87.5,92,47,78,50,0,37.5,100,69,88,70,100,94,50,44]
+        y_female = [25,20,0,0,0,12.5,8,53,22,50,100,62.5,0,31,12,30,0,6,50,56]
+        
+        trace1 = go.Bar(x=categories, y=y_male, name="Male")
+        trace2 = go.Bar(x=categories, y=y_female, name="Female")
+        
+        trace3 = go.Scatter(x=categories, 
+                    y=[50], 
+                    name="50% Mark",
+                    line=dict(
+                    color="rgb(0,0,0)")
+                    )
+        
+        return {
+            
+            "data": [
+                trace1, trace2, trace3
+            ],
+            
+            "layout": go.Layout(
+                title="91st Academy Award Nominations for Non-Acting Categories, by Gender",
+                barmode="stack"
             )
         }
     
