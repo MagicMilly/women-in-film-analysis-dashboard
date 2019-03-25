@@ -45,9 +45,11 @@ app.layout = html.Div(style={'backgroundColor': colors['background']}, children=
     
     html.Div(
         children=[
+            # html.H6("Enter movie title(s)"),
+            html.P("Separate multiple movies with commas"),
             dcc.Input(
                 id="text-input",
-                value="Enter movie title",
+                value="Enter movie title(s)",
                 type="text"
             )
         ]
@@ -174,9 +176,41 @@ def update_plot(radio_button_choice):
             
             "layout": go.Layout(
                 title="91st Academy Award Nominations for Non-Acting Categories, by Gender",
-                barmode="stack"
+                barmode="stack",
+                shapes=[
+                    {
+                        "type": "line",
+                        "y0":50,
+                        "x0":"All Categories",
+                        "y1":50,
+                        "x1":"Animated Short",
+                        "line": {
+                            "dash":"dot",
+                            "color":"black"
+                        }
+                    }
+                ],
             )
         }
+    
+def build_custom_df(movie_titles):
+    
+    # clear any pre-existing lists or dataframes
+    split_movie_list = []
+    stripped_movie_list = []
+    row_list = []
+    final_df = pd.DataFrame()
+    
+    if ',' not in movie_titles:
+        stripped_movie = movie_titles.strip().lower()
+        final_df = df[df.title == stripped_movie]
+    
+    else:
+        split_movie_list = movie_titles.split(',')
+        stripped_movie_list = [m.strip().lower() for m in split_movie_list]
+        final_df = df[df.title.isin(stripped_movie_list)]
+        
+    return final_df
     
 @app.callback(
     Output('output-table', 'data'),
@@ -184,8 +218,7 @@ def update_plot(radio_button_choice):
 )
 def update_table(text_input):
     
-    title = str(text_input).lower()
-    selected_df = bechdel_df[bechdel_df.title == title]
+    selected_df = build_custom_df(text_input)
     
     return selected_df.to_dict("rows")
     
