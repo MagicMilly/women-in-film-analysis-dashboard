@@ -42,6 +42,18 @@ def choose_background_color(df):
     
     return style 
 
+def generate_table(dataframe, max_rows=25):
+    return html.Table(
+        
+        # Header
+        [html.Tr([html.Th(col) for col in dataframe.columns])] +
+
+        # Body
+        [html.Tr([
+            html.Td(dataframe.iloc[i][col]) for col in dataframe.columns
+        ]) for i in range(min(len(dataframe), max_rows))]
+    )
+
 app.layout = html.Div(style={'backgroundColor': colors['background']}, children=[
             html.H1(
                 children='Hello Dash',
@@ -71,6 +83,23 @@ app.layout = html.Div(style={'backgroundColor': colors['background']}, children=
     
     html.Div(
         children=[
+            dcc.Dropdown(
+                id='dropdown', 
+                options=[
+                    {'label': i, 'value': i} for i in bechdel_df.title.unique()
+                ],
+                multi=True, 
+                placeholder='Filter by movie...'
+            )
+        ]
+    ),
+    
+    html.Div(
+        id='table-container'
+    ),
+    
+    html.Div(
+        children=[
             dash_table.DataTable(
                 id='table-paging-and-sorting',
                 columns=[
@@ -92,14 +121,15 @@ app.layout = html.Div(style={'backgroundColor': colors['background']}, children=
                     'current_page': 0,
                     'page_size': PAGE_SIZE
                 },
-                
                 pagination_mode='be',
                 sorting='be',
                 sorting_type='single',
                 sorting_settings=[]
+                # editable=True
             )
         ]
-    )
+    ),
+])
     
 #     html.Div(
 #         children=dcc.RadioItems(
@@ -132,7 +162,6 @@ app.layout = html.Div(style={'backgroundColor': colors['background']}, children=
 #             )
 #         ]
 #     )
-])
 
 # @app.callback(
 #     Output('output-plot', 'figure'),
