@@ -10,7 +10,7 @@ from dash.dependencies import Input, Output, State
 # for use with html.Table - Tab 2
 condensed_bechdel = pd.read_csv('my_data/condensed_bechdel_7.csv')
 # for use in interactive DataTable - Tab 3
-bechdel_df = pd.read_csv('my_data/lowercase_bechdel_7.csv')
+bechdel_df = pd.read_csv('my_data/bechdel_7_for_datatable.csv')
 
 
 oscar_categories = ["All Categories", "Best Picture", "Director", "Cinematography", "Editing",
@@ -130,32 +130,56 @@ app.layout = html.Div([
         
         dcc.Tab(label='Interactive DataTable', children=[
             html.Div([
-                html.H1("This is the content in tab 3"),
+                html.H3("Bechdel Test points explained"),
+                html.P("""
+                    The score column represents how many points a movie scored on the Bechdel Test. A 3-point score is considered
+                    passing. Points are awarded as follows:
+                    """),
+                html.P("* 1 point for two named female characters"),
+                html.P("* 2 points for two named female characters who talk to each other"),
+                html.P("* 3 points for two named female characters who talk to each other about something other than a man"),
+                html.P("""In the director, writer, and producer columns, a 1 signifies that there was at least one crew member 
+                    in that role of an underrepresented gender. The overall column is the sum of those points. A movie that had at
+                    least one director, writer, and producer of an underrepresented gender would have a value of 3 in the overall
+                    column. Note that the Bechdel Test is only concerned with the movie's content. The crew member, budget, and revenue
+                    columns were added to the data that was scraped from the Bechdel Test website.
+                    """),
                 dash_table.DataTable(
-                    id='table-paging-and-sorting',
+                    id='datatable-interactivity',
                     columns=[
-                        {'name': i, 'id': i, 'deletable': True} for i in bechdel_df.columns
+                        {"name": i, "id": i, "deletable": True} for i in bechdel_df.columns
                     ],
-                    style_cell_conditional=
-                    [
-                    {
-                        'if': {'column_id': c},
-                        'textAlign': 'left'
-                    } for c in ['year', 'title']
+                    data=bechdel_df.to_dict("rows"),
+                    editable=True,
+                    filtering=True,
+                    style_cell_conditional=[
+                        {
+                            'if': {'column_id': c},
+                            'textAlign': 'left'
+                        } for c in ['year', 'title']
+                    ] + [
+                        {
+                            'if': {'row_index': 'odd'},
+                            'backgroundColor': 'rgb(248, 248, 248)'
+                        }
                     ],
-                    style_as_list_view=True,
+                    sorting=True,
+                    sorting_type="multi",
+                    row_selectable="multi",
+                    row_deletable=True,
+                    selected_rows=[],
+                    pagination_mode="fe",
                     pagination_settings={
-                        'current_page': 0,
-                        'page_size': PAGE_SIZE
+                        "displayed_pages": 1,
+                        "current_page": 0,
+                        "page_size": 5,
                     },
-                    pagination_mode='be',
-                    sorting='be',
-                    sorting_type='single',
-                    sorting_settings=[],
-                    editable=True
-                )]
-            )
-        ]),
+                    navigation="page",
+                ),
+        html.Div(id='datatable-interactivity-container')
+            ]
+        )        
+    ]),
     ],
         style={
         'fontFamily': 'system-ui'
@@ -183,24 +207,75 @@ def display_table(dropdown_value):
     dff = condensed_bechdel[condensed_bechdel.title.str.contains('|'.join(dropdown_value))]
     return generate_table(dff)
 
-# Tab Three - Interactive DataTable
+# Tab Three - Interactive DataTable - Paging & Sorting
+# @app.callback(
+#     Output('table-paging-and-sorting', 'data'),
+#     [Input('table-paging-and-sorting', 'pagination_settings'),
+#     Input('table-paging-and-sorting', 'sorting_settings')])
+# def update_graph(pagination_settings, sorting_settings):
+#     if len(sorting_settings):
+#         dff = bechdel_df.sort_values(
+#         sorting_settings[0]['column_id'],
+#         ascending=sorting_settings[0]['direction'] == 'asc',
+#         inplace=False)
+#     else:
+#         # No sort is applied
+#         dff = bechdel_df
+#     return dff.iloc[
+#         pagination_settings['current_page'] * pagination_settings['page_size']:
+#         (pagination_settings['current_page'] + 1) * pagination_settings['page_size']
+#     ].to_dict('rows')
+
+# Tab Three - Graph Output from DataTable
 @app.callback(
-    Output('table-paging-and-sorting', 'data'),
-    [Input('table-paging-and-sorting', 'pagination_settings'),
-    Input('table-paging-and-sorting', 'sorting_settings')])
-def update_graph(pagination_settings, sorting_settings):
-    if len(sorting_settings):
-        dff = bechdel_df.sort_values(
-        sorting_settings[0]['column_id'],
-        ascending=sorting_settings[0]['direction'] == 'asc',
-        inplace=False)
-    else:
-        # No sort is applied
+    Output('datatable-interactivity-container', "children"),
+    [Input('datatable-interactivity', "derived_virtual_data"),
+    Input('datatable-interactivity', "derived_virtual_selected_rows")])
+def update_graph(rows, derived_virtual_selected_rows):
+    
+    if derived_virtual_selected_rows is None:
+        derived_virtual_selected_rows = []
+
+    if rows is None:
         dff = bechdel_df
-    return dff.iloc[
-        pagination_settings['current_page'] * pagination_settings['page_size']:
-        (pagination_settings['current_page'] + 1) * pagination_settings['page_size']
-    ].to_dict('rows')
+    else:
+        dff = pd.DataFrame(rows)
+        
+    colors = []
+    for i in range(len(dff)):
+        if i in derived_virtual_selected_rows:
+            colors.append("#7FDBFF")
+        else:
+            colors.append("#0074D9")
+    
+    return html.Div(
+        [
+            dcc.Graph(
+                id=column,
+                figure={
+                    "data": [
+                        {
+                            "x": dff["title"],
+                            # check if column exists - user may have deleted it
+                            # If `column.deletable=False`, then you don't
+                            # need to do this check.
+                            "y": dff[column] if column in dff else [],
+                            "type": "bar",
+                            "marker": {"color": colors},
+                        }
+                    ],
+                    "layout": {
+                        "xaxis": {"automargin": True},
+                        "yaxis": {"automargin": True},
+                        "height": 250,
+                        "margin": {"t": 10, "l": 10, "r": 10},
+                    },
+                },
+            )
+            for column in ["score", "passing", "overall"]
+        ]
+    )
+    
 
 
 if __name__ == '__main__':
