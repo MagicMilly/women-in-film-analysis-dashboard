@@ -7,7 +7,7 @@ import plotly.graph_objs as go
 from dash.dependencies import Input, Output
 
 bechdel_df = pd.read_csv('my_data/lowercase_bechdel_7.csv')
-bechdel_df['index'] = range(1, len(bechdel_df) + 1)
+# bechdel_df['index'] = range(1, len(bechdel_df) + 1)
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
@@ -17,8 +17,30 @@ PAGE_SIZE = 10
 
 colors = {
     'background': '#FFFFFF',
-    'text': '#000000'
+    'text': '#000000',
+    'passing': '#90EE90',
+    'failing': '#E78383'
 }
+
+def choose_background_color(df):
+    
+    style = {}
+    
+    for i in range(len(df)):
+        
+        if df.iloc[i]['passing'] == 1:
+            
+            style = {
+                'backgroundColor': colors['passing']
+            }
+        
+        else:
+            
+            style = {
+                'backgroundColor': colors['failing']
+            }
+    
+    return style 
 
 app.layout = html.Div(style={'backgroundColor': colors['background']}, children=[
             html.H1(
@@ -34,19 +56,6 @@ app.layout = html.Div(style={'backgroundColor': colors['background']}, children=
         'color': colors['text']
     }),
     
-    html.Div(
-        children=dcc.RadioItems(
-            id='radio-button-choice',
-            options=[
-                {'label': 'Passing vs. Non-Passing Movies', 'value': 'passing'},
-                {'label': 'Movies by Year', 'value': 'yearly'},
-                {'label': 'Crew Gender', 'value': 'crew'},
-                {"label": "Oscars 2019", "value": "oscars"},
-                {"label": "Just Explore the Dataset", "value": "explore"}
-            ]
-        )      
-    ),
-    
 #     html.Div(
 #         children=[
 #             # html.H6("Enter movie title(s)"),
@@ -61,33 +70,59 @@ app.layout = html.Div(style={'backgroundColor': colors['background']}, children=
 #     ),
     
     html.Div(
-        id="graph-container",
-        children=[
-            dcc.Graph(
-                id="output-plot"
-            )
-        ]
-    ),
-    
-    html.Div(
         children=[
             dash_table.DataTable(
-            id='table-paging-and-sorting',
-            columns=[
-                {'name': i, 'id': i, 'deletable': True} for i in bechdel_df.columns
-            ],
-            pagination_settings={
-                'current_page': 0,
-                'page_size': PAGE_SIZE
-            },
-            pagination_mode='be',
-            sorting='be',
-            sorting_type='single',
-            sorting_settings=[]
+                id='table-paging-and-sorting',
+                columns=[
+                    {'name': i, 'id': i, 'deletable': True} for i in bechdel_df.columns
+                ],
+                # style_cell=choose_background_color(bechdel_df),
+                style_cell_conditional=
+                [
+                    {
+                        'if': {'column_id': c},
+                        'textAlign': 'left'
+                    } for c in ['year', 'title']
+                ],
+#                 + [
+#                     choose_background_color(bechdel_df)
+#                 ],
+                style_as_list_view=True,
+                pagination_settings={
+                    'current_page': 0,
+                    'page_size': PAGE_SIZE
+                },
+                
+                pagination_mode='be',
+                sorting='be',
+                sorting_type='single',
+                sorting_settings=[]
             )
         ]
     )
-])
+    
+#     html.Div(
+#         children=dcc.RadioItems(
+#             id='radio-button-choice',
+#             options=[
+#                 {'label': 'Passing vs. Non-Passing Movies', 'value': 'passing'},
+#                 {'label': 'Movies by Year', 'value': 'yearly'},
+#                 {'label': 'Crew Gender', 'value': 'crew'},
+#                 {"label": "Oscars 2019", "value": "oscars"},
+#                 {"label": "Option that will make that empty grid disappear", "value": "disappear"}
+#             ]
+#         )      
+#     ),
+    
+#     html.Div(
+#         id="graph-container",
+#         children=[
+#             dcc.Graph(
+#                 id="output-plot"
+#             )
+#         ]
+#     )
+# ])
     
 #     html.Div(
 #         children=[
@@ -97,12 +132,12 @@ app.layout = html.Div(style={'backgroundColor': colors['background']}, children=
 #             )
 #         ]
 #     )
-# ])
+])
 
-@app.callback(
-    Output('output-plot', 'figure'),
-    [Input('radio-button-choice', 'value')]
-)
+# @app.callback(
+#     Output('output-plot', 'figure'),
+#     [Input('radio-button-choice', 'value')]
+# )
 def update_plot(radio_button_choice):
     
     year_counts = bechdel_df.groupby(['year']).size()
@@ -238,8 +273,8 @@ def update_graph(pagination_settings, sorting_settings):
         dff = bechdel_df
 
     return dff.iloc[
-        pagination_settings['current_page']*pagination_settings['page_size']:
-        (pagination_settings['current_page'] + 1)*pagination_settings['page_size']
+        pagination_settings['current_page'] * pagination_settings['page_size']:
+        (pagination_settings['current_page'] + 1) * pagination_settings['page_size']
     ].to_dict('rows')
     
 # @app.callback(
