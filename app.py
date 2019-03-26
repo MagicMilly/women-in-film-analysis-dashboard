@@ -49,7 +49,8 @@ app.layout = html.Div(style={'backgroundColor': colors['background']}, children=
             html.P("Separate multiple movies with commas"),
             dcc.Input(
                 id="text-input",
-                value="Enter movie title(s)",
+                # value="edge of tomorrow",
+                value="enter movie",
                 type="text"
             )
         ]
@@ -195,22 +196,33 @@ def update_plot(radio_button_choice):
     
 def build_custom_df(movie_titles):
     
+    print('Build custom df is being called')
+    
     # clear any pre-existing lists or dataframes
     split_movie_list = []
     stripped_movie_list = []
     row_list = []
-    final_df = pd.DataFrame()
+    # final_df = pd.DataFrame()
     
-    if ',' not in movie_titles:
-        stripped_movie = movie_titles.strip().lower()
-        final_df = df[df.title == stripped_movie]
+    # movie_titles = str(movie_titles)
+    print(movie_titles)
     
-    else:
-        split_movie_list = movie_titles.split(',')
-        stripped_movie_list = [m.strip().lower() for m in split_movie_list]
-        final_df = df[df.title.isin(stripped_movie_list)]
-        
+#     if "," not in movie_titles:
+#         stripped_movie = movie_titles.strip().lower()
+#         final_df = bechdel_df[bechdel_df.title == stripped_movie]
+    
+#     else:
+#         split_movie_list = movie_titles.split(",")
+#         stripped_movie_list = [m.strip().lower() for m in split_movie_list]
+#         final_df = bechdel_df[bechdel_df.title.isin(stripped_movie_list)]
+    stripped_movie_title = movie_titles.strip().lower()
+    print(stripped_movie_title)
+    final_df = bechdel_df.loc[bechdel_df.title == stripped_movie_title]
+    # print(final_df)
+    print('final_df is being made!')
     return final_df
+        
+    # return final_df
     
 @app.callback(
     Output('output-table', 'data'),
@@ -219,6 +231,11 @@ def build_custom_df(movie_titles):
 def update_table(text_input):
     
     selected_df = build_custom_df(text_input)
+    print(selected_df.to_dict("rows"))
+    print('selected_df is being made!')
+    
+    # title = str(text_input).lower()
+    # selected_df = bechdel_df[bechdel_df.title == title]
     
     return selected_df.to_dict("rows")
     
