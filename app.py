@@ -7,10 +7,13 @@ import plotly.graph_objs as go
 from dash.dependencies import Input, Output
 
 bechdel_df = pd.read_csv('my_data/lowercase_bechdel_7.csv')
+bechdel_df['index'] = range(1, len(bechdel_df) + 1)
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
+
+PAGE_SIZE = 10
 
 colors = {
     'background': '#FFFFFF',
@@ -18,13 +21,13 @@ colors = {
 }
 
 app.layout = html.Div(style={'backgroundColor': colors['background']}, children=[
-    html.H1(
-        children='Hello Dash',
-        style={
-            'textAlign': 'center',
-            'color': colors['text']
-        }
-    ),
+            html.H1(
+                children='Hello Dash',
+                style={
+                    'textAlign': 'center',
+                    'color': colors['text']
+                }
+            ),
     
     html.Div(children='Bechdel Test Data', style={
         'textAlign': 'center',
@@ -38,25 +41,27 @@ app.layout = html.Div(style={'backgroundColor': colors['background']}, children=
                 {'label': 'Passing vs. Non-Passing Movies', 'value': 'passing'},
                 {'label': 'Movies by Year', 'value': 'yearly'},
                 {'label': 'Crew Gender', 'value': 'crew'},
-                {"label": "Oscars 2019", "value": "oscars"}
+                {"label": "Oscars 2019", "value": "oscars"},
+                {"label": "Just Explore the Dataset", "value": "explore"}
             ]
         )      
     ),
     
-    html.Div(
-        children=[
-            # html.H6("Enter movie title(s)"),
-            html.P("Separate multiple movies with commas"),
-            dcc.Input(
-                id="text-input",
-                # value="edge of tomorrow",
-                value="enter movie",
-                type="text"
-            )
-        ]
-    ),
+#     html.Div(
+#         children=[
+#             # html.H6("Enter movie title(s)"),
+#             html.P("Separate multiple movies with commas"),
+#             dcc.Input(
+#                 id="text-input",
+#                 value="edge of tomorrow",
+#                 # value="enter movie",
+#                 type="text"
+#             )
+#         ]
+#     ),
     
     html.Div(
+        id="graph-container",
         children=[
             dcc.Graph(
                 id="output-plot"
@@ -67,12 +72,32 @@ app.layout = html.Div(style={'backgroundColor': colors['background']}, children=
     html.Div(
         children=[
             dash_table.DataTable(
-                id="output-table",
-                columns=[{"name": i, "id": i} for i in bechdel_df.columns]
+            id='table-paging-and-sorting',
+            columns=[
+                {'name': i, 'id': i, 'deletable': True} for i in bechdel_df.columns
+            ],
+            pagination_settings={
+                'current_page': 0,
+                'page_size': PAGE_SIZE
+            },
+            pagination_mode='be',
+            sorting='be',
+            sorting_type='single',
+            sorting_settings=[]
             )
         ]
     )
 ])
+    
+#     html.Div(
+#         children=[
+#             dash_table.DataTable(
+#                 id="output-table",
+#                 columns=[{"name": i, "id": i} for i in bechdel_df.columns]
+#             )
+#         ]
+#     )
+# ])
 
 @app.callback(
     Output('output-plot', 'figure'),
@@ -194,50 +219,89 @@ def update_plot(radio_button_choice):
             )
         }
     
-def build_custom_df(movie_titles):
+@app.callback(
+    Output('table-paging-and-sorting', 'data'),
+    [Input('table-paging-and-sorting', 'pagination_settings'),
+    Input('table-paging-and-sorting', 'sorting_settings')])
+def update_graph(pagination_settings, sorting_settings):
     
-    print('Build custom df is being called')
+    if len(sorting_settings):
     
-    # clear any pre-existing lists or dataframes
-    split_movie_list = []
-    stripped_movie_list = []
-    row_list = []
-    # final_df = pd.DataFrame()
+        dff = bechdel_df.sort_values(
+        sorting_settings[0]['column_id'],
+        ascending=sorting_settings[0]['direction'] == 'asc',
+        inplace=False
+        )
     
-    # movie_titles = str(movie_titles)
-    print(movie_titles)
+    else:
+        # No sort is applied
+        dff = bechdel_df
+
+    return dff.iloc[
+        pagination_settings['current_page']*pagination_settings['page_size']:
+        (pagination_settings['current_page'] + 1)*pagination_settings['page_size']
+    ].to_dict('rows')
     
-#     if "," not in movie_titles:
-#         stripped_movie = movie_titles.strip().lower()
-#         final_df = bechdel_df[bechdel_df.title == stripped_movie]
+# @app.callback(
+#     Output('graph-container', 'style'), 
+#     [Input('radio-button-choice', 'value')]
+# )
+# def hide_graph(radio_button_choice):
+    
+#     if radio_button_choice == "explore":
+        
+#         return {'display':'none'}
     
 #     else:
-#         split_movie_list = movie_titles.split(",")
-#         stripped_movie_list = [m.strip().lower() for m in split_movie_list]
-#         final_df = bechdel_df[bechdel_df.title.isin(stripped_movie_list)]
-    stripped_movie_title = movie_titles.strip().lower()
-    print(stripped_movie_title)
-    final_df = bechdel_df.loc[bechdel_df.title == stripped_movie_title]
-    # print(final_df)
-    print('final_df is being made!')
-    return final_df
         
-    # return final_df
+#         return {'display':'block'}
     
-@app.callback(
-    Output('output-table', 'data'),
-    [Input('text-input', 'value')]
-)
-def update_table(text_input):
+# def build_custom_df(movie_titles):
     
-    selected_df = build_custom_df(text_input)
-    print(selected_df.to_dict("rows"))
-    print('selected_df is being made!')
+#     print('Build custom df is being called')
     
-    # title = str(text_input).lower()
-    # selected_df = bechdel_df[bechdel_df.title == title]
+#     # clear any pre-existing lists or dataframes
+#     split_movie_list = []
+#     stripped_movie_list = []
+#     row_list = []
+#     # final_df = pd.DataFrame()
     
-    return selected_df.to_dict("rows")
+#     # movie_titles = str(movie_titles)
+#     print(movie_titles)
+    
+# #     if "," not in movie_titles:
+# #         stripped_movie = movie_titles.strip().lower()
+# #         final_df = bechdel_df[bechdel_df.title == stripped_movie]
+    
+# #     else:
+# #         split_movie_list = movie_titles.split(",")
+# #         stripped_movie_list = [m.strip().lower() for m in split_movie_list]
+# #         final_df = bechdel_df[bechdel_df.title.isin(stripped_movie_list)]
+#     stripped_movie_title = movie_titles.strip().lower()
+#     print(stripped_movie_title)
+#     final_df = bechdel_df.loc[bechdel_df.title == stripped_movie_title]
+#     # print(final_df)
+#     print('final_df is being made!')
+#     return final_df
+        
+#     # return final_df
+    
+# @app.callback(
+#     Output('output-table', 'data'),
+#     [Input('text-input', 'value')]
+# )
+# def update_table(text_input):
+    
+#     selected_df = build_custom_df(text_input)
+#     print('selected_df is being made!')
+#     data = selected_df.to_dict("rows")
+#     print(data)
+    
+    
+#     # title = str(text_input).lower()
+#     # selected_df = bechdel_df[bechdel_df.title == title]
+    
+#     return data
     
 
 if __name__ == '__main__':
