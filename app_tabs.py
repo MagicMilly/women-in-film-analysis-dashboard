@@ -10,7 +10,7 @@ from dash.dependencies import Input, Output, State
 # for use with html.Table - Tab 2
 condensed_bechdel = pd.read_csv('my_data/condensed_bechdel_7.csv')
 # for use in interactive DataTable - Tab 3
-bechdel_df = pd.read_csv('my_data/bechdel_7_for_datatable.csv')
+bechdel_df = pd.read_csv('my_data/bechdel_8_for_datatable.csv')
 
 
 oscar_categories = ["All Categories", "Best Picture", "Director", "Cinematography", "Editing",
@@ -43,7 +43,8 @@ def cell_style(value):
             'backgroundColor': colors['failing']
         }   
     return style
- 
+
+# Use cell color styling for non-interactive html.Table of Tab Two (Choose Your Movie) 
 def generate_table(dataframe, max_rows=20):
     rows = []
     for i in range(min(len(dataframe), max_rows)):
@@ -207,39 +208,32 @@ def display_table(dropdown_value):
     dff = condensed_bechdel[condensed_bechdel.title.str.contains('|'.join(dropdown_value))]
     return generate_table(dff)
 
-# Tab Three - Interactive DataTable - Paging & Sorting
-# @app.callback(
-#     Output('table-paging-and-sorting', 'data'),
-#     [Input('table-paging-and-sorting', 'pagination_settings'),
-#     Input('table-paging-and-sorting', 'sorting_settings')])
-# def update_graph(pagination_settings, sorting_settings):
-#     if len(sorting_settings):
-#         dff = bechdel_df.sort_values(
-#         sorting_settings[0]['column_id'],
-#         ascending=sorting_settings[0]['direction'] == 'asc',
-#         inplace=False)
-#     else:
-#         # No sort is applied
-#         dff = bechdel_df
-#     return dff.iloc[
-#         pagination_settings['current_page'] * pagination_settings['page_size']:
-#         (pagination_settings['current_page'] + 1) * pagination_settings['page_size']
-#     ].to_dict('rows')
-
 # Tab Three - Graph Output from DataTable
 @app.callback(
     Output('datatable-interactivity-container', "children"),
-    [Input('datatable-interactivity', "derived_virtual_data"),
+    [Input('datatable-interactivity', "derived_viewport_data"),
     Input('datatable-interactivity', "derived_virtual_selected_rows")])
-def update_graph(rows, derived_virtual_selected_rows):
+def update_graph(derived_viewport_data, derived_virtual_selected_rows):
     
-    if derived_virtual_selected_rows is None:
-        derived_virtual_selected_rows = []
+    # I wrote this, and it doesn't do anything
+#     if derived_virtual_data is None:
+#         derived_virtual_data = bechdel_df.to_rows('dict')
+    
+    # Example Code
+#     if derived_virtual_selected_rows is None:
+#         derived_virtual_selected_rows = []
 
-    if rows is None:
-        dff = bechdel_df
-    else:
-        dff = pd.DataFrame(rows)
+    # Example Code 
+#     if rows is None:
+#         dff = bechdel_df
+#     else:
+#         dff = pd.DataFrame(rows)
+
+    print(derived_viewport_data)
+    print(derived_virtual_selected_rows)
+
+    # if derived_virtual_selected_rows is None:
+    dff = pd.DataFrame(derived_viewport_data)
         
     colors = []
     for i in range(len(dff)):
