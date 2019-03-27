@@ -108,15 +108,15 @@ app.layout = html.Div([
             ])
         ]),
         
-        dcc.Tab(label='Choose Your Movie', children=[
+        dcc.Tab(label='Choose Your Own Movie', children=[
             html.Div([
                 html.H3("Movies in the Bechdel Test Dataset"),
                 html.P("""
                     Enter a movie tittle or use the dropdown menu to select one or more movies to see if they passed the Bechdel Test. A
-                    green box in the "passing" column indicates that a movie passed the test. For the "director", "writer", and "producer"
+                    green box in the passing column indicates that a movie passed the test. For the director, writer, and producer
                     column, a green box indicates that there was at least one crew member in that role of an underrepresented gender. The
-                    "overall" column represents the sum of the crew columns. If a movie had at least one director, writer, and producer
-                    of an underrepresented gender, that movie would have the maximum "overall" value of 3.
+                    overall column represents the sum of the crew columns. If a movie had at least one director, writer, and producer
+                    of an underrepresented gender, that movie would have the maximum overall value of 3.
                     """),
                 dcc.Dropdown(
                     id='dropdown',
@@ -129,16 +129,16 @@ app.layout = html.Div([
             ])
         ]),
         
-        dcc.Tab(label='Interactive DataTable', children=[
+        dcc.Tab(label='Interactive DataTable - Explore Test Scores & Crew Gender', children=[
             html.Div([
                 html.H3("Bechdel Test points explained"),
                 html.P("""
                     The score column represents how many points a movie scored on the Bechdel Test. A 3-point score is considered
                     passing. Points are awarded as follows:
                     """),
-                html.P("* 1 point for two named female characters"),
-                html.P("* 2 points for two named female characters who talk to each other"),
-                html.P("* 3 points for two named female characters who talk to each other about something other than a man"),
+                html.P("1 point for two named female characters"),
+                html.P("2 points for two named female characters who talk to each other"),
+                html.P("3 points for two named female characters who talk to each other about something other than a man"),
                 html.P("""In the director, writer, and producer columns, a 1 signifies that there was at least one crew member 
                     in that role of an underrepresented gender. The overall column is the sum of those points. A movie that had at
                     least one director, writer, and producer of an underrepresented gender would have a value of 3 in the overall
@@ -148,7 +148,7 @@ app.layout = html.Div([
                 dash_table.DataTable(
                     id='datatable-interactivity',
                     columns=[
-                        {"name": i, "id": i, "deletable": True} for i in bechdel_df.columns
+                        {"name": i, "id": i, "deletable": False} for i in bechdel_df.columns
                     ],
                     data=bechdel_df.to_dict("rows"),
                     editable=True,
@@ -173,7 +173,7 @@ app.layout = html.Div([
                     pagination_settings={
                         "displayed_pages": 1,
                         "current_page": 0,
-                        "page_size": 5,
+                        "page_size": 20,
                     },
                     navigation="page",
                 ),
@@ -198,7 +198,7 @@ app.layout = html.Div([
     )
 ]) 
 
-# Table for Tab Two - Choose Your Movie
+# Callback for Tab Two - Choose Your Movie
 @app.callback(
     dash.dependencies.Output('table-container', 'children'),
     [dash.dependencies.Input('dropdown', 'value')])
@@ -208,33 +208,18 @@ def display_table(dropdown_value):
     dff = condensed_bechdel[condensed_bechdel.title.str.contains('|'.join(dropdown_value))]
     return generate_table(dff)
 
-# Tab Three - Graph Output from DataTable
+# Callback for Tab Three - Graph Output from DataTable
 @app.callback(
     Output('datatable-interactivity-container', "children"),
     [Input('datatable-interactivity', "derived_viewport_data"),
     Input('datatable-interactivity', "derived_virtual_selected_rows")])
 def update_graph(derived_viewport_data, derived_virtual_selected_rows):
-    
-    # I wrote this, and it doesn't do anything
-#     if derived_virtual_data is None:
-#         derived_virtual_data = bechdel_df.to_rows('dict')
-    
-    # Example Code
-#     if derived_virtual_selected_rows is None:
-#         derived_virtual_selected_rows = []
 
-    # Example Code 
-#     if rows is None:
-#         dff = bechdel_df
-#     else:
-#         dff = pd.DataFrame(rows)
-
-    print(derived_viewport_data)
-    print(derived_virtual_selected_rows)
-
-    # if derived_virtual_selected_rows is None:
+    # Output graph will only contain rows from the current page.
+    # If rows are deleted, new movies will populate the table to keep the page at preset size and appear in graph.
     dff = pd.DataFrame(derived_viewport_data)
         
+    # Rows/movies selected by user will change color in graph
     colors = []
     for i in range(len(dff)):
         if i in derived_virtual_selected_rows:
@@ -250,10 +235,10 @@ def update_graph(derived_viewport_data, derived_virtual_selected_rows):
                     "data": [
                         {
                             "x": dff["title"],
+                            # If column.deletable=True,
                             # check if column exists - user may have deleted it
-                            # If `column.deletable=False`, then you don't
-                            # need to do this check.
-                            "y": dff[column] if column in dff else [],
+                            # "y": dff[column] if column in dff else [],
+                            "y": dff[column],
                             "type": "bar",
                             "marker": {"color": colors},
                         }
@@ -261,12 +246,13 @@ def update_graph(derived_viewport_data, derived_virtual_selected_rows):
                     "layout": {
                         "xaxis": {"automargin": True},
                         "yaxis": {"automargin": True},
-                        "height": 250,
-                        "margin": {"t": 10, "l": 10, "r": 10},
+                        "height": 300,
+                        "margin": {"t": 50, "l": 10, "r": 10},
+                        "title": column
                     },
                 },
             )
-            for column in ["score", "passing", "overall"]
+            for column in ["score", "passing", "director", "writer", "producer", "overall"]
         ]
     )
     
@@ -274,4 +260,3 @@ def update_graph(derived_viewport_data, derived_virtual_selected_rows):
 
 if __name__ == '__main__':
     app.run_server(debug=True)
-
