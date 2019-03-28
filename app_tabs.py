@@ -83,7 +83,7 @@ app.scripts.config.serve_locally = True
 
 
 app.layout = html.Div([
-    html.H1('The Bechdel Test & Women in the Film Industry', style={
+    html.H1('Women in Film & The Bechdel Test', style={
             'textAlign': 'center', 'margin': '48px 0', 'fontFamily': 'system-ui'}),
     
     dcc.Tabs(id="tabs", children=[
