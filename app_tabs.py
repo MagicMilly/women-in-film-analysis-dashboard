@@ -247,7 +247,7 @@ def update_graph(derived_viewport_data, derived_virtual_selected_rows):
                         "xaxis": {"automargin": True},
                         "yaxis": {"automargin": True},
                         "height": 300,
-                        "margin": {"t": 50, "l": 10, "r": 10},
+                        "margin": {"t": 75, "l": 10, "r": 10, "b":100},
                         "title": column
                     },
                 },
