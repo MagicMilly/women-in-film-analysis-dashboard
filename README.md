@@ -116,7 +116,7 @@ Another goal of this project was to present data-driven insights for end-users w
 
 The above screenshot shows a comparison of all the Jurassic Park and Jurassic World movies, and how a user can customize their search for their favorite movies (or for their favorite franchise, which happens to include their non-favorite films of Jurassic Park II and III).  
 
-## Further Research & Recommendation
+## Further Research & Recommendations
 
 In addition to the Bechdel Test data, I'm also interested in adding more information to the dashboard about the Academy Awards and other awards for each year to see how the gender data has changed over time, salary information for actors vs. actresses, and more movie data - particularly around the most popular movies with the highest box office revenues and award recognitions.
 
