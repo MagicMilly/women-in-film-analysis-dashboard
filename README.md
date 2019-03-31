@@ -28,4 +28,19 @@ I downloaded and inspected numerous movie datasets from [data.world](https://dat
 
 The above movie dataset included the top three actors for each movie. Luckily for me, I happen to love James Bond movies, so I was able to catch that the James Bond movie entry of **Spectre** did not include *the actor who plays James Bond*, Daniel Craig. Immediately burned, I felt that I could not trust this dataset of 5000+ movies, so I set out to collect my own data which I could be sure was trustworthy - or at least more trustworthy than a dataset that doesn't include James Bond as a top actor in a James Bond film. 
 
-I eventually decided that I absolutely needed the data contained in the Wikipedia infoboxes. 
+The other primary sources of data that I used to supplement my original dataset included:
+* Wikidata SPARQL queries
+* The Movie Database (TMDb) API
+
+## Film Features
+The other data I collected consisted of:
+* film budget
+* revenue / box office
+* whether there was a director of an underrepresented gender (cisgender and transgender females, transgender males, or non-binary)
+* screenwriter of an underrepresented gender
+* producer of an underrepresented gender
+
+## Findings
+Using the films in my dataset, I found that films were more likely to pass the Bechdel Test if there was at least one person of an underrepresented gender in any of the roles of director, writer, or producer. The plot below shows the total number of films in the dataset. A film received one point for each role of director, writer, and producer if there was at least one person in that role of an underrepresented gender. The `overall` column is the sum of all those points - the maximum being 3 points per movie. 
+
+![Bar graph showing the difference between films that pass and fail the Bechdel Test and presence of crew members of an underrepresented gender](/images/crew_gender.png)
