@@ -83,6 +83,8 @@ def generate_table(dataframe, max_rows=20):
 # app = dash.Dash(__name__)
 # server = app.server
 
+# I am only making this comment because I want to test the emojis
+
 app = dash.Dash()
 app.css.config.serve_locally = True
 app.scripts.config.serve_locally = True
