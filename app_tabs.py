@@ -79,9 +79,8 @@ def generate_table(dataframe, max_rows=20):
         rows.append(html.Tr(row))
     return html.Table([html.Tr([html.Th(col) for col in dataframe.columns])] + rows)
 
-# for deployment to heroku, uncomment the 3 lines below and comment lines for local server
-# external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
-# app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
+# for deployment to heroku, uncomment the 2 lines below and comment lines for local server
+# app = dash.Dash(__name__)
 # server = app.server
 
 app = dash.Dash()
