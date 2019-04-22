@@ -7,6 +7,9 @@ import plotly.graph_objs as go
 
 from dash.dependencies import Input, Output, State
 
+# for deployment to heroku
+# import os
+
 # for use with html.Table - Tab 2
 condensed_bechdel = pd.read_csv('my_data/condensed_bechdel_7.csv')
 # for use in interactive DataTable - Tab 3
@@ -76,8 +79,12 @@ def generate_table(dataframe, max_rows=20):
         rows.append(html.Tr(row))
     return html.Table([html.Tr([html.Th(col) for col in dataframe.columns])] + rows)
 
-app = dash.Dash()
+# for deployment to heroku, uncomment the 3 lines below and comment lines for local server
+# external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
+# app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
+# server = app.server
 
+app = dash.Dash()
 app.css.config.serve_locally = True
 app.scripts.config.serve_locally = True
 
