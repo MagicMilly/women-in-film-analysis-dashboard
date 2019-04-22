@@ -1,5 +1,6 @@
 # The Bechdel Test & Women in Film
 ### Capstone Project for Flatiron Data Science Program
+### Explore the dashboard [here](https://women-in-film.herokuapp.com/)
 
 ## Motivation
 The Bechdel Test is a scoring system used to measure how a film and other forms of media represent women. The Bechdel Test [website](https://bechdeltest.com/) contains over 8,000 user-submitted films and their scoring on the test. Users can also challenge a film's score if they believe it was rated incorrectly. Three points are required to pass the test. Points are awarded as follows:
@@ -142,7 +143,7 @@ Although there is more crowdsourced data right now on the Bechdel Test, other te
   
 ## Other Resources 
 Many organizations keep track of, report on, and promote diversity in the film industry, in addition to working on other important women's issues. Some of these organizations include
-* Annenberg Inclusion Initiative - University of Southern California based think tank focused on diversity and inclusion in entertainment
-* Women's Media Center - Nonpartisan and Non-profit organization founded by Jane Fonda, Robin Morgan and Gloria Steinem to raise awareness and take action on a wide range of issues affecting women and girls
-* Geena Davis Institute on Gender & Media - "If she can see it, she can be it" - promotes increased visibility of women in media and in other roles, especially in roles where girls may not have seen much female representation
-* Women in Media - Non-profit organization promoting gender balance in media by offering networking for female and female-identifying crew members
+* [Annenberg Inclusion Initiative](https://annenberg.usc.edu/research/aii) - University of Southern California based think tank focused on diversity and inclusion in entertainment
+* [Women's Media Center](http://www.womensmediacenter.com/) - Nonpartisan and Non-profit organization founded by Jane Fonda, Robin Morgan and Gloria Steinem to raise awareness and take action on a wide range of issues affecting women and girls
+* [Geena Davis Institute on Gender & Media](https://seejane.org/) - "If she can see it, she can be it" - promotes increased visibility of women in media and in other roles, especially in roles where girls may not have seen much female representation
+* [Women in Media](https://womennmedia.com/) - Non-profit organization promoting gender balance in media by offering networking for female and female-identifying crew members
