@@ -2,9 +2,6 @@
 ### Capstone Project for Flatiron Data Science Program
 ### Explore the dashboard [here](https://women-in-film.herokuapp.com/)
 
-### Update November 2019
-#### [Alex Thomson](https://github.com/alexthomson1) has kindly informed me that these notebooks are a complete mess and do not run. I will update the README when this issue is fixed. 
-
 ## Motivation
 The Bechdel Test is a scoring system used to measure how a film and other forms of media represent women. The Bechdel Test [website](https://bechdeltest.com/) contains over 8,000 user-submitted films and their scoring on the test. Users can also challenge a film's score if they believe it was rated incorrectly. Three points are required to pass the test. Points are awarded as follows:
 * 1 point for two named female characters 
